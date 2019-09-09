@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Data;
 using Web.Domain;
 using Web.Domain.Entities;
 using Web.Models;
+using Web.Services.Interfaces;
 
 namespace Web.Controllers
 {
   public class HomeController : Controller
   {
     private DataDbContext _dataDbContext;
+    private IJwtService _jwtService;
 
-    public HomeController(DataDbContext dataDbContext)
+    public HomeController(DataDbContext dataDbContext, IJwtService jwtService)
     {
       _dataDbContext = dataDbContext;
+      _jwtService = jwtService;
     }
 
     public JsonResult Index()
@@ -28,15 +32,16 @@ namespace Web.Controllers
       }
     }
 
-    public IActionResult Privacy()
+    [HttpGet("token")]
+    public string Token()
     {
-      return View();
+      return _jwtService.GenerateToken();
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [AllowAnonymous]
     public IActionResult Error()
     {
-      return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+      return BadRequest("Error : Something wrong!");
     }
   }
 }
